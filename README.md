@@ -3,6 +3,8 @@
 
 This is a Helm YAML deployment script converted from the `docker-compose.yaml` and `.env` files under the `docker` directory of the open-source `Dify` project. It sets up the basic infrastructure for a high-availability deployment of `Dify`, and can be further customized to support more complex deployment architectures.
 
+[中文](https://github.com/flower-trees/dify-chart/blob/master/README_CN.md)
+
 ## Kubernetes
 
 In this example, `Docker` and `minikube` are used as demonstration environments. Make sure both are installed on your system.
