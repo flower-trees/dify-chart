@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-web
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: dify-web
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      app: dify-web
+  template:
+    metadata:
+      labels:
+        app: dify-web
+    spec:
+      containers:
+      - name: web
+        image: {{ .Values.web.image }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        env:
+        # Common Variables
+        - name: CONSOLE_API_URL
+          value: {{ .Values.sharedEnv.consoleApiUrl | default "" | quote }}
+        - name: APP_API_URL
+          value: {{ .Values.sharedEnv.appApiUrl | default "" | quote }}
+        # Sentry Configuration
+        - name: SENTRY_DSN
+          value: {{ .Values.sharedEnv.webSentryDsn | default "" | quote }}
+        # Telemetry
+        - name: NEXT_TELEMETRY_DISABLED
+          value: {{ .Values.sharedEnv.nextTelemetryDisabled | default "0" | quote }}
+        # Web Service Specific
+        - name: TEXT_GENERATION_TIMEOUT_MS
+          value: {{ .Values.sharedEnv.textGenerationTimeoutMs | default "60000" | quote }}
+        # CSP Configuration
+        - name: CSP_WHITELIST
+          value: {{ .Values.sharedEnv.cspWhitelist | default "" | quote }}
+        # Marketplace Configuration
+        - name: MARKETPLACE_API_URL
+          value: {{ .Values.sharedEnv.marketplaceApiUrl | default "https://marketplace.dify.ai" | quote }}
+        - name: MARKETPLACE_URL
+          value: {{ .Values.sharedEnv.marketplaceUrl | default "https://marketplace.dify.ai" | quote }}
+        # Others Configuration
+        - name: TOP_K_MAX_VALUE
+          value: {{ .Values.sharedEnv.topKMaxValue | default "" | quote }}
+        - name: INDEXING_MAX_SEGMENTATION_TOKENS_LENGTH
+          value: {{ .Values.sharedEnv.indexingMaxSegmentationTokensLength | default "" | quote }}
+        - name: PM2_INSTANCES
+          value: {{ .Values.sharedEnv.pm2Instances | default "2" | quote }}
+        - name: LOOP_NODE_MAX_COUNT
+          value: {{ .Values.sharedEnv.loopNodeMaxCount | default "100" | quote }}
+        - name: MAX_TOOLS_NUM
+          value: {{ .Values.sharedEnv.maxToolsNum | default "10" | quote }}
+        ports:
+        - containerPort: 3000  
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      restartPolicy: Always

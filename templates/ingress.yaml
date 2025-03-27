@@ -1,0 +1,70 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-ingress
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.ingress.className | default "nginx" }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /console/api
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-api
+                port:
+                  number: 5001
+
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-api
+                port:
+                  number: 5001
+
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-api
+                port:
+                  number: 5001
+
+          - path: /files
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-api
+                port:
+                  number: 5001
+
+          - path: /explore
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-web
+                port:
+                  number: 3000
+
+          - path: /e/
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-plugin-daemon
+                port:
+                  number: 5002
+
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-web
+                port:
+                  number: 3000
+

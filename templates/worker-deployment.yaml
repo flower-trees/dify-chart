@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: dify-worker
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      app: dify-worker
+  template:
+    metadata:
+      labels:
+        app: dify-worker
+    spec:
+      containers:
+      - name: worker
+        image: {{ .Values.worker.image }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        env:
+        - $setElementOrder:
+          {{- range $key := keys .Values.sharedEnv | sortAlpha }}
+          - name: {{ regexReplaceAll "([a-z0-9])([A-Z])" $key "${1}_${2}" | upper }}
+          {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-env  
+        env:
+        # Worker-specific environment variables
+        - name: MODE
+          value: {{ .Values.worker.mode | quote }}
+        - name: SENTRY_DSN
+          value: {{ .Values.sharedEnv.apiSentryDsn | default "" | quote }}
+        - name: SENTRY_TRACES_SAMPLE_RATE
+          value: {{ .Values.sharedEnv.apiSentryTracesSampleRate | default "1.0" | quote }}
+        - name: SENTRY_PROFILES_SAMPLE_RATE
+          value: {{ .Values.sharedEnv.apiSentryProfilesSampleRate | default "1.0" | quote }}
+        - name: PLUGIN_MAX_PACKAGE_SIZE
+          value: {{ .Values.sharedEnv.pluginMaxPackageSize | default "52428800" | quote }}
+        - name: INNER_API_KEY_FOR_PLUGIN
+          value: {{ .Values.sharedEnv.pluginDifyInnerApiKey | default "QaHbTe77CtuXmsfyhR7+vRjI/+XbV1AaFy691iy+kGDv2Jvy0/eAh8Y1" | quote }}
+        volumeMounts:
+        - name: storage
+          mountPath: /app/api/storage
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "200m"
+          limits:
+            memory: "1024Mi"
+            cpu: "1000m"
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-storage
+      restartPolicy: Always

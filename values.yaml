@@ -1,0 +1,545 @@
+# values.yaml
+# Helm chart values for Dify deployment
+
+global:
+ imagePullPolicy: IfNotPresent
+ namespace: dify
+
+# Shared environment variables for API, Worker, and other services
+sharedEnv:
+ # Common Variables
+ consoleApiUrl: "http://dify.local"
+ consoleWebUrl: "http://dify.local"
+ serviceApiUrl: ""
+ appApiUrl: ""
+ appWebUrl: ""
+ filesUrl: ""
+
+ # Server Configuration
+ logLevel: "INFO"
+ logFile: "/app/logs/server.log"
+ logFileMaxSize: 20
+ logFileBackupCount: 5
+ logDateformat: "%Y-%m-%d %H:%M:%S"
+ logTz: "UTC"
+ debug: false
+ flaskDebug: false
+ secretKey: "sk-9f73s3ljTXVcMT3Blb3ljTqtsKiGHXVcMT3BlbkFJLK7U"
+ initPassword: ""
+ deployEnv: "PRODUCTION"
+ checkUpdateUrl: "https://updates.dify.ai"
+ openaiApiBase: "https://api.openai.com/v1"
+ migrationEnabled: true
+ filesAccessTimeout: 300
+ accessTokenExpireMinutes: 60
+ refreshTokenExpireDays: 30
+ appMaxActiveRequests: 0
+ appMaxExecutionTime: 1200
+
+ # Container Startup Related Configuration
+ difyBindAddress: "0.0.0.0"
+ difyPort: 5001
+ serverWorkerAmount: 1
+ serverWorkerClass: "gevent"
+ serverWorkerConnections: 10
+ celeryWorkerClass: ""
+ gunicornTimeout: 360
+ celeryWorkerAmount: ""
+ celeryAutoScale: false
+ celeryMaxWorkers: ""
+ celeryMinWorkers: ""
+ apiToolDefaultConnectTimeout: 10
+ apiToolDefaultReadTimeout: 60
+
+ # Database Configuration
+ dbUsername: "postgres"
+ dbPassword: "difyai123456"
+ dbHost: "host.docker.internal"
+ dbPort: 5432
+ dbDatabase: "dify"
+ sqlalchemyPoolSize: 30
+ sqlalchemyPoolRecycle: 3600
+ sqlalchemyEcho: false
+ postgresMaxConnections: 100
+ postgresSharedBuffers: "128MB"
+ postgresWorkMem: "4MB"
+ postgresMaintenanceWorkMem: "64MB"
+ postgresEffectiveCacheSize: "4096MB"
+
+ # Redis Configuration
+ redisHost: "host.docker.internal"
+ redisPort: 6379
+ redisUsername: ""
+ redisPassword: "difyai123456"
+ redisUseSsl: false
+ redisDb: 0
+ redisUseSentinel: false
+ redisSentinels: ""
+ redisSentinelServiceName: ""
+ redisSentinelUsername: ""
+ redisSentinelPassword: ""
+ redisSentinelSocketTimeout: 0.1
+ redisUseClusters: false
+ redisClusters: ""
+ redisClustersPassword: ""
+
+ # Celery Configuration
+ celeryBrokerUrl: "redis://:difyai123456@host.docker.internal:6379/1"
+ brokerUseSsl: false
+ celeryUseSentinel: false
+ celerySentinelMasterName: ""
+ celerySentinelSocketTimeout: 0.1
+
+ # CORS Configuration
+ webApiCorsAllowOrigins: "*"
+ consoleCorsAllowOrigins: "*"
+
+ # File Storage Configuration
+ storageType: "opendal"
+ opendalScheme: "fs"
+ opendalFsRoot: "storage"
+ s3Endpoint: ""
+ s3Region: "us-east-1"
+ s3BucketName: "difyai"
+ s3AccessKey: ""
+ s3SecretKey: ""
+ s3UseAwsManagedIam: false
+ azureBlobAccountName: "difyai"
+ azureBlobAccountKey: "difyai"
+ azureBlobContainerName: "difyai-container"
+ azureBlobAccountUrl: "https://<your_account_name>.blob.core.windows.net"
+ googleStorageBucketName: "your-bucket-name"
+ googleStorageServiceAccountJsonBase64: ""
+ aliyunOssBucketName: "your-bucket-name"
+ aliyunOssAccessKey: "your-access-key"
+ aliyunOssSecretKey: "your-secret-key"
+ aliyunOssEndpoint: "https://oss-ap-southeast-1-internal.aliyuncs.com"
+ aliyunOssRegion: "ap-southeast-1"
+ aliyunOssAuthVersion: "v4"
+ aliyunOssPath: "your-path"
+ tencentCosBucketName: "your-bucket-name"
+ tencentCosSecretKey: "your-secret-key"
+ tencentCosSecretId: "your-secret-id"
+ tencentCosRegion: "your-region"
+ tencentCosScheme: "your-scheme"
+ ociEndpoint: "https://your-object-storage-namespace.compat.objectstorage.us-ashburn-1.oraclecloud.com"
+ ociBucketName: "your-bucket-name"
+ ociAccessKey: "your-access-key"
+ ociSecretKey: "your-secret-key"
+ ociRegion: "us-ashburn-1"
+ huaweiObsBucketName: "your-bucket-name"
+ huaweiObsSecretKey: "your-secret-key"
+ huaweiObsAccessKey: "your-access-key"
+ huaweiObsServer: "your-server-url"
+ volcengineTosBucketName: "your-bucket-name"
+ volcengineTosSecretKey: "your-secret-key"
+ volcengineTosAccessKey: "your-access-key"
+ volcengineTosEndpoint: "your-server-url"
+ volcengineTosRegion: "your-region"
+ baiduObsBucketName: "your-bucket-name"
+ baiduObsSecretKey: "your-secret-key"
+ baiduObsAccessKey: "your-access-key"
+ baiduObsEndpoint: "your-server-url"
+ supabaseBucketName: "your-bucket-name"
+ supabaseApiKey: "your-access-key"
+ supabaseUrl: "your-server-url"
+
+ # Vector Database Configuration
+ vectorStore: "weaviate"
+ weaviateEndpoint: "http://host.docker.internal:8080"
+ weaviateApiKey: "WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih"
+ qdrantUrl: "http://qdrant:6333"
+ qdrantApiKey: "difyai123456"
+ qdrantClientTimeout: 20
+ qdrantGrpcEnabled: false
+ qdrantGrpcPort: 6334
+ milvusUri: "http://host.docker.internal:19530"
+ milvusToken: ""
+ milvusUser: ""
+ milvusPassword: ""
+ milvusEnableHybridSearch: false
+ myscaleHost: "myscale"
+ myscalePort: 8123
+ myscaleUser: "default"
+ myscalePassword: ""
+ myscaleDatabase: "dify"
+ myscaleFtsParams: ""
+ couchbaseConnectionString: "couchbase://couchbase-server"
+ couchbaseUser: "Administrator"
+ couchbasePassword: "password"
+ couchbaseBucketName: "Embeddings"
+ couchbaseScopeName: "_default"
+ pgvectorHost: "pgvector"
+ pgvectorPort: 5432
+ pgvectorUser: "postgres"
+ pgvectorPassword: "difyai123456"
+ pgvectorDatabase: "dify"
+ pgvectorMinConnection: 1
+ pgvectorMaxConnection: 5
+ pgvectorPgBigm: false
+ pgvectorPgBigmVersion: "1.2-20240606"
+ pgvectoRsHost: "pgvecto-rs"
+ pgvectoRsPort: 5432
+ pgvectoRsUser: "postgres"
+ pgvectoRsPassword: "difyai123456"
+ pgvectoRsDatabase: "dify"
+ analyticdbKeyId: "your-ak"
+ analyticdbKeySecret: "your-sk"
+ analyticdbRegionId: "cn-hangzhou"
+ analyticdbInstanceId: "gp-ab123456"
+ analyticdbAccount: "testaccount"
+ analyticdbPassword: "testpassword"
+ analyticdbNamespace: "dify"
+ analyticdbNamespacePassword: "difypassword"
+ analyticdbHost: "gp-test.aliyuncs.com"
+ analyticdbPort: 5432
+ analyticdbMinConnection: 1
+ analyticdbMaxConnection: 5
+ tidbVectorHost: "tidb"
+ tidbVectorPort: 4000
+ tidbVectorUser: ""
+ tidbVectorPassword: ""
+ tidbVectorDatabase: "dify"
+ tidbOnQdrantUrl: "http://127.0.0.1"
+ tidbOnQdrantApiKey: "dify"
+ tidbOnQdrantClientTimeout: 20
+ tidbOnQdrantGrpcEnabled: false
+ tidbOnQdrantGrpcPort: 6334
+ tidbPublicKey: "dify"
+ tidbPrivateKey: "dify"
+ tidbApiUrl: "http://127.0.0.1"
+ tidbIamApiUrl: "http://127.0.0.1"
+ tidbRegion: "regions/aws-us-east-1"
+ tidbProjectId: "dify"
+ tidbSpendLimit: 100
+ chromaHost: "127.0.0.1"
+ chromaPort: 8000
+ chromaTenant: "default_tenant"
+ chromaDatabase: "default_database"
+ chromaAuthProvider: "chromadb.auth.token_authn.TokenAuthClientProvider"
+ chromaAuthCredentials: ""
+ oracleUser: "dify"
+ oraclePassword: "dify"
+ oracleDsn: "oracle:1521/FREEPDB1"
+ oracleConfigDir: "/app/api/storage/wallet"
+ oracleWalletLocation: "/app/api/storage/wallet"
+ oracleWalletPassword: "dify"
+ oracleIsAutonomous: false
+ relytHost: "db"
+ relytPort: 5432
+ relytUser: "postgres"
+ relytPassword: "difyai123456"
+ relytDatabase: "postgres"
+ opensearchHost: "opensearch"
+ opensearchPort: 9200
+ opensearchUser: "admin"
+ opensearchPassword: "admin"
+ opensearchSecure: true
+ tencentVectorDbUrl: "http://127.0.0.1"
+ tencentVectorDbApiKey: "dify"
+ tencentVectorDbTimeout: 30
+ tencentVectorDbUsername: "dify"
+ tencentVectorDbDatabase: "dify"
+ tencentVectorDbShard: 1
+ tencentVectorDbReplicas: 2
+ elasticsearchHost: "0.0.0.0"
+ elasticsearchPort: 9200
+ elasticsearchUsername: "elastic"
+ elasticsearchPassword: "elastic"
+ kibanaPort: 5601
+ baiduVectorDbEndpoint: "http://127.0.0.1:5287"
+ baiduVectorDbConnectionTimeoutMs: 30000
+ baiduVectorDbAccount: "root"
+ baiduVectorDbApiKey: "dify"
+ baiduVectorDbDatabase: "dify"
+ baiduVectorDbShard: 1
+ baiduVectorDbReplicas: 3
+ vikingdbAccessKey: "your-ak"
+ vikingdbSecretKey: "your-sk"
+ vikingdbRegion: "cn-shanghai"
+ vikingdbHost: "api-vikingdb.xxx.volces.com"
+ vikingdbSchema: "http"
+ vikingdbConnectionTimeout: 30
+ vikingdbSocketTimeout: 30
+ lindormUrl: "http://lindorm:30070"
+ lindormUsername: "lindorm"
+ lindormPassword: "lindorm"
+ oceanbaseVectorHost: "oceanbase"
+ oceanbaseVectorPort: 2881
+ oceanbaseVectorUser: "root@test"
+ oceanbaseVectorPassword: "difyai123456"
+ oceanbaseVectorDatabase: "test"
+ oceanbaseClusterName: "difyai"
+ oceanbaseMemoryLimit: "6G"
+ opengaussHost: "opengauss"
+ opengaussPort: 6600
+ opengaussUser: "postgres"
+ opengaussPassword: "Dify@123"
+ opengaussDatabase: "dify"
+ opengaussMinConnection: 1
+ opengaussMaxConnection: 5
+ upstashVectorUrl: "https://xxx-vector.upstash.io"
+ upstashVectorToken: "dify"
+
+ # Knowledge Configuration
+ uploadFileSizeLimit: 15
+ uploadFileBatchLimit: 5
+ etlType: "dify"
+ unstructuredApiUrl: ""
+ unstructuredApiKey: ""
+ scarfNoAnalytics: true
+
+ # Model Configuration
+ promptGenerationMaxTokens: 512
+ codeGenerationMaxTokens: 1024
+
+ # Multi-modal Configuration
+ multimodalSendFormat: "base64"
+ uploadImageFileSizeLimit: 10
+ uploadVideoFileSizeLimit: 100
+ uploadAudioFileSizeLimit: 50
+
+ # Sentry Configuration
+ sentryDsn: ""
+ apiSentryDsn: ""
+ apiSentryTracesSampleRate: 1.0
+ apiSentryProfilesSampleRate: 1.0
+ webSentryDsn: ""
+
+ # Notion Integration Configuration
+ notionIntegrationType: "public"
+ notionClientSecret: ""
+ notionClientId: ""
+ notionInternalSecret: ""
+
+ # Mail Configuration
+ mailType: "resend"
+ mailDefaultSendFrom: ""
+ resendApiUrl: "https://api.resend.com"
+ resendApiKey: "your-resend-api-key"
+ smtpServer: ""
+ smtpPort: 465
+ smtpUsername: ""
+ smtpPassword: ""
+ smtpUseTls: true
+ smtpOpportunisticTls: false
+
+ # Others Configuration
+ indexingMaxSegmentationTokensLength: 4000
+ inviteExpiryHours: 72
+ resetPasswordTokenExpiryMinutes: 5
+ codeExecutionEndpoint: "http://dify-sandbox.dify.svc.cluster.local:8194"
+ codeExecutionApiKey: "dify-sandbox"
+ codeMaxNumber: "9223372036854775807"
+ codeMinNumber: "-9223372036854775808"
+ codeMaxDepth: 5
+ codeMaxPrecision: 20
+ codeMaxStringLength: 80000
+ codeMaxStringArrayLength: 30
+ codeMaxObjectArrayLength: 30
+ codeMaxNumberArrayLength: 1000
+ codeExecutionConnectTimeout: 10
+ codeExecutionReadTimeout: 60
+ codeExecutionWriteTimeout: 10
+ templateTransformMaxLength: 80000
+ workflowMaxExecutionSteps: 500
+ workflowMaxExecutionTime: 1200
+ workflowCallMaxDepth: 5
+ maxVariableSize: 204800
+ workflowParallelDepthLimit: 3
+ workflowFileUploadLimit: 10
+ httpRequestNodeMaxBinarySize: "10485760"
+ httpRequestNodeMaxTextSize: "1048576"
+ httpRequestNodeSslVerify: true
+ ssrfProxyHttpUrl: "http://dify-ssrf-proxy.dify.svc.cluster.local:3128"
+ ssrfProxyHttpsUrl: "http://dify-ssrf-proxy.dify.svc.cluster.local:3128"
+ loopNodeMaxCount: 100
+ maxToolsNum: 10
+
+ # Web Service Specific
+ textGenerationTimeoutMs: 60000
+
+ # DB Service Specific
+ pguser: "${sharedEnv.dbUsername}"
+ postgresPassword: "${sharedEnv.dbPassword}"
+ postgresDb: "${sharedEnv.dbDatabase}"
+ pgdata: "/var/lib/postgresql/data/pgdata"
+
+ # Sandbox Service Specific
+ sandboxApiKey: "dify-sandbox"
+ sandboxGinMode: "release"
+ sandboxWorkerTimeout: 15
+ sandboxEnableNetwork: true
+ sandboxHttpProxy: "http://dify-ssrf-proxy.dify.svc.cluster.local:3128"
+ sandboxHttpsProxy: "http://dify-ssrf-proxy.dify.svc.cluster.local:3128"
+ sandboxPort: 8194
+
+ # Weaviate Service Specific
+ weaviatePersistenceDataPath: "/var/lib/weaviate"
+ weaviateQueryDefaultsLimit: 25
+ weaviateAuthenticationAnonymousAccessEnabled: true
+ weaviateDefaultVectorizerModule: "none"
+ weaviateClusterHostname: "node1"
+ weaviateAuthenticationApikeyEnabled: true
+ weaviateAuthenticationApikeyAllowedKeys: "WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih"
+ weaviateAuthenticationApikeyUsers: "hello@dify.ai"
+ weaviateAuthorizationAdminlistEnabled: true
+ weaviateAuthorizationAdminlistUsers: "hello@dify.ai"
+
+ # Chroma Service Specific
+ chromaServerAuthnCredentials: "difyai123456"
+ chromaServerAuthnProvider: "chromadb.auth.token_authn.TokenAuthenticationServerProvider"
+ chromaIsPersistent: "TRUE"
+
+ # Oracle Service Specific
+ oraclePwd: "Dify123456"
+ oracleCharacterset: "AL32UTF8"
+
+ # Milvus Service Specific
+ etcdAutoCompactionMode: "revision"
+ etcdAutoCompactionRetention: 1000
+ etcdQuotaBackendBytes: 4294967296
+ etcdSnapshotCount: 50000
+ minioAccessKey: "minioadmin"
+ minioSecretKey: "minioadmin"
+ etcdEndpoints: "etcd:2379"
+ minioAddress: "minio:9000"
+ milvusAuthorizationEnabled: true
+
+ # Pgvector/Pgvecto-rs Service Specific
+ pgvectorPguser: "postgres"
+ pgvectorPostgresPassword: "difyai123456"
+ pgvectorPostgresDb: "dify"
+ pgvectorPgdata: "/var/lib/postgresql/data/pgdata"
+
+ # OpenSearch Service Specific
+ opensearchDiscoveryType: "single-node"
+ opensearchBootstrapMemoryLock: true
+ opensearchJavaOptsMin: "512m"
+ opensearchJavaOptsMax: "1024m"
+ opensearchInitialAdminPassword: "Qazwsxedc!@#123"
+ opensearchMemlockSoft: "-1"
+ opensearchMemlockHard: "-1"
+ opensearchNofileSoft: 65536
+ opensearchNofileHard: 65536
+
+ # Nginx Service Specific
+ nginxServerName: "_"
+ nginxHttpsEnabled: false
+ nginxPort: 80
+ nginxSslPort: 443
+ nginxSslCertFilename: "dify.crt"
+ nginxSslCertKeyFilename: "dify .key"
+ nginxSslProtocols: "TLSv1.1 TLSv1.2 TLSv1.3"
+ nginxWorkerProcesses: "auto"
+ nginxClientMaxBodySize: "15M"
+ nginxKeepaliveTimeout: 65
+ nginxProxyReadTimeout: "3600s"
+ nginxProxySendTimeout: "3600s"
+ nginxEnableCertbotChallenge: false
+
+ # Certbot Configuration
+ certbotEmail: "your_email@example.com"
+ certbotDomain: "your_domain.com"
+ certbotOptions: ""
+
+ # SSRF Proxy Configuration
+ ssrfHttpPort: 3128
+ ssrfCoredumpDir: "/var/spool/squid"
+ ssrfReverseProxyPort: 8194
+ ssrfSandboxHost: "sandbox"
+ ssrfDefaultTimeOut: 5
+ ssrfDefaultConnectTimeOut: 5
+ ssrfDefaultReadTimeOut: 5
+ ssrfDefaultWriteTimeOut: 5
+
+ # Docker Compose Profiles
+ composeProfiles: "${sharedEnv.vectorStore:-weaviate}"
+
+ # Exposed Ports
+ exposeNginxPort: 80
+ exposeNginxSslPort: 443
+
+ # ModelProvider & Tool Position Configuration
+ positionToolPins: ""
+ positionToolIncludes: ""
+ positionToolExcludes: ""
+ positionProviderPins: ""
+ positionProviderIncludes: ""
+ positionProviderExcludes: ""
+ cspWhitelist: ""
+ createTidbServiceJobEnabled: false
+ maxSubmitCount: 100
+ topKMaxValue: 10
+
+ # Plugin Daemon Configuration
+ dbPluginDatabase: "dify_plugin"
+ exposePluginDaemonPort: 5002
+ pluginDaemonPort: 5002
+ pluginDaemonKey: "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi"
+ pluginDaemonUrl: "http://dify-plugin-daemon.dify.svc.cluster.local:5002"
+ pluginMaxPackageSize: "52428800"
+ pluginPprofEnabled: false
+ pluginDebuggingHost: "0.0.0.0"
+ pluginDebuggingPort: 5003
+ exposePluginDebuggingHost: "localhost"
+ exposePluginDebuggingPort: 5003
+ pluginDifyInnerApiKey: "QaHbTe77CtuXmsfyhR7+vRjI/+XbV1AaFy691iy+kGDv2Jvy0/eAh8Y1"
+ pluginDifyInnerApiUrl: "http://dify-api.dify.svc.cluster.local:5001"
+ endpointUrlTemplate: "http://localhost/e/{hook_id}"
+ marketplaceEnabled: true
+ marketplaceApiUrl: "https://marketplace.dify.ai"
+ forceVerifyingSignature: true
+ pluginPythonEnvInitTimeout: 120
+ pluginMaxExecutionTimeout: 600
+ pipMirrorUrl: ""
+
+ingress:
+  enabled: true
+  className: nginx
+  host: dify.local
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+
+
+# Service-specific configurations
+api:
+ image: "langgenius/dify-api:1.0.1"
+ replicas: 2
+ mode: "api"
+
+worker:
+ image: "langgenius/dify-api:1.0.1"
+ replicas: 2
+ mode: "worker"
+
+web:
+ image: "langgenius/dify-web:1.0.1"
+ replicas: 2
+
+sandbox:
+ image: "langgenius/dify-sandbox:0.2.10"
+ replicas: 2
+
+pluginDaemon:
+ image: "langgenius/dify-plugin-daemon:0.0.4-local"
+ replicas: 2
+
+ssrfProxy:
+ image: "ubuntu/squid:latest"
+ replicas: 2
+
+volumes:
+  storage:
+    storageClassName: ""
+    accessModes: "ReadWriteOnce"
+    resources:
+      requests:
+        storage: "10Gi"
+  sandbox-dependencies:
+    storageClassName: ""
+    accessModes: ["ReadWriteOnce"]
+    resources:
+      requests:
+        storage: "5Gi"

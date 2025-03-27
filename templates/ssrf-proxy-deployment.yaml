@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-ssrf-proxy
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: dify-ssrf-proxy
+spec:
+  replicas: {{ .Values.ssrfProxy.replicas }}
+  selector:
+    matchLabels:
+      app: dify-ssrf-proxy
+  template:
+    metadata:
+      labels:
+        app: dify-ssrf-proxy
+    spec:
+      containers:
+      - name: ssrf-proxy
+        image: {{ .Values.ssrfProxy.image }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        command: [ 'sh', '-c', "cp /docker-entrypoint-mount.sh /docker-entrypoint.sh && sed -i 's/\r$$//' /docker-entrypoint.sh && chmod +x /docker-entrypoint.sh && /docker-entrypoint.sh" ]
+        env:
+        # SSRF Proxy specific environment variables
+        - name: HTTP_PORT
+          value: {{ .Values.sharedEnv.ssrfHttpPort | default "3128" | quote }}
+        - name: COREDUMP_DIR
+          value: {{ .Values.sharedEnv.ssrfCoredumpDir | default "/var/spool/squid" | quote }}
+        - name: REVERSE_PROXY_PORT
+          value: {{ .Values.sharedEnv.ssrfReverseProxyPort | default "8194" | quote }}
+        - name: SANDBOX_HOST
+          value: {{ .Values.sharedEnv.ssrfSandboxHost | default "sandbox" | quote }}
+        - name: SANDBOX_PORT
+          value: {{ .Values.sharedEnv.sandboxPort | default "8194" | quote }}
+        ports:
+        - containerPort: {{ .Values.sharedEnv.ssrfHttpPort | default 3128 }}
+        volumeMounts:
+        - name: squid-conf
+          mountPath: /etc/squid/squid.conf.template
+          subPath: squid.conf.template
+        - name: docker-entrypoint
+          mountPath: /docker-entrypoint-mount.sh
+          subPath: docker-entrypoint.sh
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: squid-conf
+        configMap:
+          name: {{ .Release.Name }}-ssrf-proxy-config
+          items:
+          - key: squid.conf.template
+            path: squid.conf.template
+      - name: docker-entrypoint
+        configMap:
+          name: {{ .Release.Name }}-ssrf-proxy-config
+          items:
+          - key: docker-entrypoint.sh
+            path: docker-entrypoint.sh
+          defaultMode: 0755  
+      restartPolicy: Always

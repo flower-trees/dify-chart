@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-sandbox
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: dify-sandbox
+spec:
+  replicas: {{ .Values.sandbox.replicas }}
+  selector:
+    matchLabels:
+      app: dify-sandbox
+  template:
+    metadata:
+      labels:
+        app: dify-sandbox
+    spec:
+      containers:
+      - name: sandbox
+        image: {{ .Values.sandbox.image }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        env:
+        # Sandbox-specific environment variables
+        - name: API_KEY
+          value: {{ .Values.sharedEnv.sandboxApiKey | default "dify-sandbox" | quote }}
+        - name: GIN_MODE
+          value: {{ .Values.sharedEnv.sandboxGinMode | default "release" | quote }}
+        - name: WORKER_TIMEOUT
+          value: {{ .Values.sharedEnv.sandboxWorkerTimeout | default "15" | quote }}
+        - name: ENABLE_NETWORK
+          value: {{ .Values.sharedEnv.sandboxEnableNetwork | default "true" | quote }}
+        - name: HTTP_PROXY
+          value: {{ .Values.sharedEnv.sandboxHttpProxy | default "http://ssrf_proxy:3128" | quote }}
+        - name: HTTPS_PROXY
+          value: {{ .Values.sharedEnv.sandboxHttpsProxy | default "http://ssrf_proxy:3128" | quote }}
+        - name: SANDBOX_PORT
+          value: {{ .Values.sharedEnv.sandboxPort | default "8194" | quote }}
+        ports:
+        - containerPort: {{ .Values.sharedEnv.sandboxPort | default 8194 }}
+        volumeMounts:
+        - name: dependencies
+          mountPath: /dependencies
+        - name: conf
+          mountPath: /conf
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.sharedEnv.sandboxPort | default 8194 }}
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.sharedEnv.sandboxPort | default 8194 }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: dependencies
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-sandbox-dependencies-storage
+      - name: conf
+        configMap:
+          name: {{ .Release.Name }}-sandbox-config
+          items:
+          - key: config.yaml
+            path: config.yaml
+      restartPolicy: Always

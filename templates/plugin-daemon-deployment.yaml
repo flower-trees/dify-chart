@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-plugin-daemon
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: dify-plugin-daemon
+spec:
+  replicas: {{ .Values.pluginDaemon.replicas }}
+  selector:
+    matchLabels:
+      app: dify-plugin-daemon
+  template:
+    metadata:
+      labels:
+        app: dify-plugin-daemon
+    spec:
+      containers:
+      - name: plugin-daemon
+        image: {{ .Values.pluginDaemon.image }}
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        env:
+        - $setElementOrder:
+          {{- range $key := keys .Values.sharedEnv | sortAlpha }}
+          - name: {{ regexReplaceAll "([a-z0-9])([A-Z])" $key "${1}_${2}" | upper }}
+          {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-env  
+        env:
+        # Plugin Daemon specific environment variables
+        - name: DB_DATABASE
+          value: {{ .Values.sharedEnv.dbPluginDatabase | default "dify_plugin" | quote }}
+        - name: SERVER_PORT
+          value: {{ .Values.sharedEnv.pluginDaemonPort | default "5002" | quote }}
+        - name: SERVER_KEY
+          value: {{ .Values.sharedEnv.pluginDaemonKey | default "lYkiYYT6owG+71oLerGzA7GXCgOT++6ovaezWAjpCjf+Sjc3ZtU+qUEi" | quote }}
+        - name: MAX_PLUGIN_PACKAGE_SIZE
+          value: {{ .Values.sharedEnv.pluginMaxPackageSize | default "52428800" | quote }}
+        - name: PPROF_ENABLED
+          value: {{ .Values.sharedEnv.pluginPprofEnabled | default "false" | quote }}
+        - name: DIFY_INNER_API_URL
+          value: {{ .Values.sharedEnv.pluginDifyInnerApiUrl | default "http://api:5001" | quote }}
+        - name: DIFY_INNER_API_KEY
+          value: {{ .Values.sharedEnv.pluginDifyInnerApiKey | default "QaHbTe77CtuXmsfyhR7+vRjI/+XbV1AaFy691iy+kGDv2Jvy0/eAh8Y1" | quote }}
+        - name: PLUGIN_REMOTE_INSTALLING_HOST
+          value: {{ .Values.sharedEnv.pluginDebuggingHost | default "0.0.0.0" | quote }}
+        - name: PLUGIN_REMOTE_INSTALLING_PORT
+          value: {{ .Values.sharedEnv.pluginDebuggingPort | default "5003" | quote }}
+        - name: PLUGIN_WORKING_PATH
+          value: {{ .Values.sharedEnv.pluginWorkingPath | default "/app/storage/cwd" | quote }}
+        - name: FORCE_VERIFYING_SIGNATURE
+          value: {{ .Values.sharedEnv.forceVerifyingSignature | default "true" | quote }}
+        - name: PYTHON_ENV_INIT_TIMEOUT
+          value: {{ .Values.sharedEnv.pluginPythonEnvInitTimeout | default "120" | quote }}
+        - name: PLUGIN_MAX_EXECUTION_TIMEOUT
+          value: {{ .Values.sharedEnv.pluginMaxExecutionTimeout | default "600" | quote }}
+        - name: PIP_MIRROR_URL
+          value: {{ .Values.sharedEnv.pipMirrorUrl | default "" | quote }}
+        ports:
+        - containerPort: {{ .Values.sharedEnv.pluginDaemonPort | default 5002 }}
+        - containerPort: {{ .Values.sharedEnv.pluginDebuggingPort | default 5003 }}
+        volumeMounts:
+        - name: plugin-daemon-storage
+          mountPath: /app/storage
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+      volumes:
+      - name: plugin-daemon-storage
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-plugin-daemon-storage
+      restartPolicy: Always

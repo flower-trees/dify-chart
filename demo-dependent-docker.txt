@@ -1,0 +1,58 @@
+# demo dependent service
+
+
+# redis
+docker run -d \
+  --name dify-db \
+  --restart always \
+  -p 5432:5432 \
+  -e PGUSER=postgres \
+  -e POSTGRES_PASSWORD=difyai123456 \
+  -e POSTGRES_DB=dify \
+  -e PGDATA=/var/lib/postgresql/data/pgdata \
+  -v $(pwd)/volumes/db/data:/var/lib/postgresql/data \
+  --health-cmd "pg_isready" \
+  --health-interval 1s \
+  --health-timeout 3s \
+  --health-retries 30 \
+  postgres:15-alpine \
+  postgres -c 'max_connections=100' \
+           -c 'shared_buffers=128MB' \
+           -c 'work_mem=4MB' \
+           -c 'maintenance_work_mem=64MB' \
+           -c 'effective_cache_size=4096MB'
+
+
+# redis
+docker run -d \
+  --name dify-redis \
+  --restart always \
+  -p 6379:6379 \
+  -e REDISCLI_AUTH=difyai123456 \
+  -v $(pwd)/volumes/redis/data:/data \
+  --health-cmd "redis-cli ping" \
+  --health-interval 30s \
+  --health-timeout 10s \
+  --health-retries 3 \
+  redis:6-alpine \
+  redis-server --requirepass difyai123456
+
+
+# weaviate
+docker run -d \
+  --name dify-weaviate \
+  --restart always \
+  -v $(pwd)/volumes/weaviate:/var/lib/weaviate \
+  -p 8080:8080 \
+  -p 50051:50051 \
+  -e PERSISTENCE_DATA_PATH=/var/lib/weaviate \
+  -e QUERY_DEFAULTS_LIMIT=25 \
+  -e AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED=false \
+  -e DEFAULT_VECTORIZER_MODULE=none \
+  -e CLUSTER_HOSTNAME=node1 \
+  -e AUTHENTICATION_APIKEY_ENABLED=true \
+  -e AUTHENTICATION_APIKEY_ALLOWED_KEYS=WVF5YThaHlkYwhGUSmCRgsX3tD5ngdN8pkih \
+  -e AUTHENTICATION_APIKEY_USERS=hello@dify.ai \
+  -e AUTHORIZATION_ADMINLIST_ENABLED=true \
+  -e AUTHORIZATION_ADMINLIST_USERS=hello@dify.ai \
+  semitechnologies/weaviate:1.19.0

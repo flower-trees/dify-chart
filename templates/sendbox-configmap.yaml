@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-sandbox-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  config.yaml: |
+    {{ .Files.Get "sandbox/config.yaml" | replace "\r\n" "\n" | nindent 4 }}

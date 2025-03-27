@@ -1,0 +1,5 @@
+apiVersion: v2
+name: dify
+description: A Helm chart that replicates dify original docker-compose.yaml & .env
+version: 0.1.0
+appVersion: "1.0.1"

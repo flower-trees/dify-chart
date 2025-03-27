@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-ssrf-proxy-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  squid.conf.template: |
+    {{ .Files.Get "ssrf_proxy/squid.conf.template" | replace "\r\n" "\n" | nindent 4 }}
+  docker-entrypoint.sh: |
+    {{ .Files.Get "ssrf_proxy/docker-entrypoint.sh" | replace "\r\n" "\n" | nindent 4 }}
